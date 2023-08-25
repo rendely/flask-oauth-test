@@ -21,6 +21,9 @@ oauth.register(
         'scope': 'openid email profile'
     }
 )
+
+# If user is not logged in, shows login button
+# else shows the user email
 @app.route('/')
 def index():
   if not session.get('user'):
@@ -28,6 +31,8 @@ def index():
 
   return f"Hello, {session.get('user')}"
 
+# This constructs a redirect URI to the Google oauth server 
+# and redirects the user there
 @app.route('/google/')
 def google():
 
@@ -37,6 +42,8 @@ def google():
   session['nonce'] = generate_token()
   return oauth.google.authorize_redirect(redirect_uri, nonce=session['nonce'])
 
+# The Google auth server redirects the user back to this route
+# This route parses out the response to try and auth the user
 @app.route('/google/auth')  
 def google_auth():
   token = oauth.google.authorize_access_token()
