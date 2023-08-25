@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for, session
+from flask import Flask, url_for, session, redirect
 from authlib.common.security import generate_token
 from authlib.integrations.flask_client import OAuth
 
@@ -29,7 +29,7 @@ def index():
   if not session.get('user'):
     return '<a href="/google">Login</a>'
 
-  return f"Hello, {session.get('user')}"
+  return f"Hello, {session.get('user')}. <a href='/clear'>Logout</a>"
 
 # This constructs a redirect URI to the Google oauth server 
 # and redirects the user there
@@ -51,7 +51,16 @@ def google_auth():
   if user.get('nonce') != session.get('nonce'):
     return 'Invalid nonce', 400
   session['user'] = user['email']
-  return 'Google auth'
+  return redirect(url_for('index'))
+
+
+# Log out
+@app.route('/clear')
+def clear():
+  session['user'] = None
+  session['nonce'] = None
+  return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(port=3000, debug=True)
