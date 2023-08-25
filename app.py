@@ -28,8 +28,9 @@ oauth.register(
 def index():
   if not session.get('user'):
     return '<a href="/google">Login</a>'
-
-  return f"Hello, {session.get('user')}. <a href='/clear'>Logout</a>"
+  response  = f"Hello, {session.get('user')}. <a href='/clear'>Logout</a>"
+  response += f"<br></br><img src='{session.get('picture')}' />"
+  return response, 200
 
 
 # This constructs a redirect URI to the Google oauth server 
@@ -51,6 +52,7 @@ def google_auth():
   if user.get('nonce') != session.get('nonce'):
     return 'Invalid nonce', 400
   session['user'] = user['email']
+  session['picture'] = user['picture']
   return redirect(url_for('index'))
 
 
