@@ -3,7 +3,6 @@ from flask import Flask, url_for, session, redirect
 from authlib.common.security import generate_token
 from authlib.integrations.flask_client import OAuth
 
-
 app = Flask(__name__)   
 app.secret_key = os.urandom(12)
 
@@ -22,6 +21,7 @@ oauth.register(
     }
 )
 
+
 # If user is not logged in, shows login button
 # else shows the user email
 @app.route('/')
@@ -31,16 +31,16 @@ def index():
 
   return f"Hello, {session.get('user')}. <a href='/clear'>Logout</a>"
 
+
 # This constructs a redirect URI to the Google oauth server 
 # and redirects the user there
 @app.route('/google/')
 def google():
-
-  # Redirect to google_auth function
   redirect_uri = url_for('google_auth', _external=True)
   print(redirect_uri)
   session['nonce'] = generate_token()
   return oauth.google.authorize_redirect(redirect_uri, nonce=session['nonce'])
+
 
 # The Google auth server redirects the user back to this route
 # This route parses out the response to try and auth the user
