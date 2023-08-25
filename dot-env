@@ -1,4 +1,4 @@
 Template for .env file
-
+SECRET_KEY='Add secret key python -c "import os; print(os.urandom(24))"'
 CLIENT_ID='Add me'
 CLIENT_SECRET='Add me'

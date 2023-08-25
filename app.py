@@ -4,7 +4,7 @@ from authlib.common.security import generate_token
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)   
-app.secret_key = os.urandom(12)
+app.secret_key = os.environ.get('SECRET_KEY')
 
 oauth = OAuth(app)
 
