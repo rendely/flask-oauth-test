@@ -28,7 +28,7 @@ oauth.register(
 def index():
   if not session.get('user'):
     return '<a href="/google">Login</a>'
-  response  = f"Hello, {session.get('user')}. <a href='/clear'>Logout</a>"
+  response  = f"Hello there, {session.get('user')}. <a href='/clear'>Logout</a>"
   response += f"<br></br><img src='{session.get('picture')}' />"
   return response, 200
 
