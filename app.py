@@ -1,4 +1,5 @@
 import os
+import requests
 from flask import Flask, url_for, session, redirect
 from authlib.common.security import generate_token
 from authlib.integrations.flask_client import OAuth
@@ -17,7 +18,7 @@ oauth.register(
     client_secret=GOOGLE_CLIENT_SECRET,
     server_metadata_url=CONF_URL,
     client_kwargs={
-        'scope': 'openid email profile'
+        'scope': 'email'
     }
 )
 
@@ -28,7 +29,7 @@ oauth.register(
 def index():
   if not session.get('user'):
     return '<a href="/google">Login</a>'
-  response  = f"Hello there, {session.get('user')}. <a href='/clear'>Logout</a>"
+  response  = f"Hello there, {session.get('user')}. <a href='/clear'>Logout</a> or  <a href='/revoke'>Revoke</a>"
   response += f"<br></br><img src='{session.get('picture')}' />"
   return response, 200
 
@@ -38,7 +39,6 @@ def index():
 @app.route('/google/')
 def google():
   redirect_uri = url_for('google_auth', _external=True)
-  print(redirect_uri)
   session['nonce'] = generate_token()
   return oauth.google.authorize_redirect(redirect_uri, nonce=session['nonce'])
 
@@ -52,7 +52,8 @@ def google_auth():
   if user.get('nonce') != session.get('nonce'):
     return 'Invalid nonce', 400
   session['user'] = user['email']
-  session['picture'] = user['picture']
+  # session['picture'] = user['picture']
+  session['token'] = token['access_token']
   return redirect(url_for('index'))
 
 
@@ -63,6 +64,24 @@ def clear():
   session['nonce'] = None
   return redirect(url_for('index'))
 
+# Remove access from the account
+@app.route('/revoke')
+def revoke():
+  if 'token' not in session:
+    return ('You need to <a href="/authorize">authorize</a> before ' +
+            'testing the code to revoke credentials.')
+
+  token = session['token']
+
+  revoke = requests.post('https://oauth2.googleapis.com/revoke',
+      params={'token': token},
+      headers = {'content-type': 'application/x-www-form-urlencoded'})
+
+  status_code = getattr(revoke, 'status_code')
+  if status_code == 200:
+    return redirect(url_for('clear'))
+  else:
+    return('An error occurred.')
 
 if __name__ == '__main__':
     app.run(port=3000, debug=True)
