@@ -64,13 +64,10 @@ def clear():
   session['nonce'] = None
   return redirect(url_for('index'))
 
-# Remove access from the account
+# Revoke the Oauth access
+# Useful for resetting the state
 @app.route('/revoke')
 def revoke():
-  if 'token' not in session:
-    return ('You need to <a href="/authorize">authorize</a> before ' +
-            'testing the code to revoke credentials.')
-
   token = session['token']
 
   revoke = requests.post('https://oauth2.googleapis.com/revoke',
